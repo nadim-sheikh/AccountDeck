@@ -139,7 +139,9 @@ function openTerminal({ title, env = {}, commands = [], cwd }) {
   fs.writeFileSync(file, lines.join('\r\n') + '\r\n', 'utf8');
   log('terminal script:', file, '\n' + lines.join('\n'));
   if (!isWin) return file;
-  spawn('cmd.exe', ['/k', cmdq(file)], { detached: true, stdio: 'ignore', windowsVerbatimArguments: true, cwd: P.home }).unref();
+  // `detached` uses DETACHED_PROCESS on Windows (no console at all), so go through `start`,
+  // which allocates a new visible console window for the cmd /k session.
+  spawn('cmd.exe', ['/c', 'start', '"AccountDeck"', 'cmd.exe', '/k', cmdq(file)], { detached: true, stdio: 'ignore', windowsVerbatimArguments: true, cwd: P.home }).unref();
   return file;
 }
 function cleanRunScripts() {
